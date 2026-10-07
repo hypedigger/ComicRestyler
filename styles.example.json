@@ -1,0 +1,58 @@
+{
+  "defaults": {
+    "steps": 28,
+    "cnet_strength": 0.55,
+    "cnet_end": 0.8,
+    "denoise": 0.7,
+    "long_side": 1344,
+    "pony": {
+      "checkpoint": "autismmixSDXL_autismmixPony.safetensors",
+      "cfg": 7.0,
+      "prefix": "score_9, score_8_up, score_7_up, source_anime, rating_safe, ",
+      "negative": "score_6, score_5, score_4, worst quality, low quality, jpeg artifacts, blurry, watermark, logo, 3d, photo"
+    },
+    "illustrious": {
+      "checkpoint": "waiIllustriousSDXL_v170.safetensors",
+      "cfg": 5.5,
+      "prefix": "masterpiece, best quality, amazing quality, ",
+      "negative": "worst quality, bad quality, jpeg artifacts, blurry, watermark, logo, censored, 3d, photo"
+    },
+    "suffix": ""
+  },
+  "styles": {
+    "manga_bw": {
+      "label": "Manga N&B (trames)",
+      "base": "illustrious",
+      "prompt": "monochrome, greyscale, manga style, screentone, ink lineart, detailed hatching, high contrast",
+      "negative_extra": ", color",
+      "denoise": 0.7
+    },
+    "ligne_claire": {
+      "label": "Ligne claire (franco-belge)",
+      "base": "illustrious",
+      "prompt": "ligne claire, european comic style, bande dessinee, clean uniform outlines, flat colors, retro",
+      "denoise": 0.72
+    },
+    "comics_us": {
+      "label": "Comics US encré",
+      "base": "illustrious",
+      "prompt": "american comic book style, western comics, bold ink outlines, dramatic shading, halftone dots, saturated colors",
+      "denoise": 0.72
+    },
+    "aquarelle": {
+      "label": "Aquarelle",
+      "base": "illustrious",
+      "prompt": "watercolor \\(medium\\), traditional media, painterly, soft edges, pastel colors",
+      "denoise": 0.72
+    },
+    "colorisation": {
+      "label": "Colorisation (N&B → couleur)",
+      "base": "illustrious",
+      "prompt": "colored, anime coloring, vibrant colors, cel shading, detailed color illustration",
+      "negative_extra": ", monochrome, greyscale, sketch",
+      "denoise": 0.9,
+      "cnet_strength": 0.7,
+      "cnet_end": 0.6
+    }
+  }
+}

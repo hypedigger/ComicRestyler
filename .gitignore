@@ -1,0 +1,13 @@
+# config & etat personnels (bibliotheque, checkpoints, styles custom)
+app_settings.json
+styles.json
+
+# modeles telecharges a la demande (detecteur de bulles GPL ~91 Mo, tagger WD)
+.bubbles/
+.tagger/
+
+# caches & outils locaux
+__pycache__/
+*.pyc
+.claude/
+*.lnk

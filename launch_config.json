@@ -1,0 +1,16 @@
+{
+ "python": "%USERPROFILE%\\Documents\\ComfyUI\\.venv\\Scripts\\python.exe",
+ "comfy_main": "%LOCALAPPDATA%\\Comfy-Desktop\\ComfyUI-Installs\\ComfyUI\\ComfyUI\\main.py",
+ "comfy_port": 8188,
+ "comfy_args": [
+  "--port",
+  "8188",
+  "--listen",
+  "127.0.0.1",
+  "--base-directory",
+  "%USERPROFILE%\\Documents\\ComfyUI",
+  "--extra-model-paths-config",
+  "%USERPROFILE%\\Documents\\ComfyUI\\extra_model_paths_xenogears.yaml",
+  "--disable-all-custom-nodes"
+ ]
+}
