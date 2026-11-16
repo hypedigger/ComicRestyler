@@ -49,6 +49,8 @@ If ComicRestyler made something cool:
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/hypedigger)
 
+The app also has a **☕ Soutenir sur Ko-fi** link in the Options dialog, and shows a small one-click-dismissable reminder on the 10th launch, then every 100 launches (tick "Ne plus me le demander" to turn it off for good). The launch counter is stored locally in `app_settings.json` and never leaves your machine.
+
 ## License
 
 [MIT](LICENSE)

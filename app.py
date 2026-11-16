@@ -13,6 +13,7 @@ import re
 import subprocess
 import threading
 import tkinter as tk
+import webbrowser
 from tkinter import filedialog, messagebox
 
 import ttkbootstrap as tb
@@ -121,6 +122,11 @@ class Tooltip:
             except Exception:
                 pass
             Tooltip._tip = None
+
+
+def open_kofi():
+    """Ouvre la page Ko-fi du créateur dans le navigateur par défaut."""
+    webbrowser.open(ml.KOFI_URL)
 
 
 def tip(widget, text):
@@ -358,6 +364,12 @@ class App(tb.Window):
         start = self.settings.get("last_dir") or ""
         if SMOKE and start and os.path.isdir(start):
             self.after(100, lambda: self.set_dir(start))
+
+        # invitation Ko-fi : 10e lancement puis tous les 100, après l'affichage
+        if not SMOKE:
+            n_uses = ml.bump_usage_count(self.settings)
+            if ml.support_due(n_uses, self.settings.get("support_optout")):
+                self.after(2500, self._show_support_popup)
 
     @property
     def thumb_h(self):
@@ -753,6 +765,9 @@ class App(tb.Window):
             self._opts_win.lift()
             return
         self._opts_win = OptionsView(self)
+
+    def _show_support_popup(self):
+        SupportView(self)
 
     def open_custom(self, page, anchor=None, preset=None):
         if self._custom_panel is not None and self._custom_panel.winfo_exists():
@@ -2825,6 +2840,11 @@ class OptionsView(tb.Toplevel):
                   command=self.save).pack(side="right", padx=4)
         tb.Button(btns, text="Fermer", bootstyle="secondary",
                   command=self.destroy).pack(side="right")
+        tip(tb.Button(btns, text="☕ Soutenir sur Ko-fi", bootstyle="link",
+                      cursor="hand2", command=open_kofi),
+            "%s est gratuit et open source : un petit café aide à le faire "
+            "vivre. Ouvre ko-fi.com/hypedigger dans le "
+            "navigateur." % ml.APP_NAME).pack(side="left")
 
     def _cycle_theme(self, direction):
         names = [lbl for _n, lbl in self.theme_pairs]
@@ -2900,6 +2920,54 @@ class OptionsView(tb.Toplevel):
         ml.save_launch_config(lc)
         self.app.status_label.config(text="Options enregistrées.")
         self.destroy()
+
+
+class SupportView(tb.Toplevel):
+    """Invitation Ko-fi (10e lancement, puis tous les 100) : fermable d'un
+    clic, avec opt-out définitif. Fenêtre liée à l'app, non bloquante."""
+
+    def __init__(self, app):
+        super().__init__(title="Vous aimez %s ?" % ml.APP_NAME, master=app)
+        self.transient(app)
+        self.app = app
+        self.resizable(False, False)
+        self.bind("<Escape>", lambda e: self.close())
+        self.protocol("WM_DELETE_WINDOW", self.close)
+        frm = tb.Frame(self, padding=18)
+        frm.pack(fill="both", expand=True)
+        tb.Label(frm, text="☕ Vous aimez %s ?" % ml.APP_NAME,
+                 font=("Segoe UI Semibold", 13),
+                 bootstyle="primary").pack(anchor="w")
+        tb.Label(frm, text="Cette application est gratuite et open source, "
+                           "développée sur le temps libre de son créateur.\n\n"
+                           "Si elle vous fait gagner du temps, un petit café "
+                           "sur Ko-fi l'aide à continuer — merci !",
+                 wraplength=400, justify="left").pack(anchor="w", pady=(10, 14))
+        self.optout_var = tk.BooleanVar(value=False)
+        tb.Checkbutton(frm, text="Ne plus me le demander",
+                       variable=self.optout_var,
+                       bootstyle="round-toggle").pack(anchor="w")
+        btns = tb.Frame(self, padding=(8, 0, 8, 10))
+        btns.pack(fill="x")
+        tb.Button(btns, text="☕ Soutenir sur Ko-fi", bootstyle="primary",
+                  command=self.support).pack(side="right", padx=4)
+        tb.Button(btns, text="Plus tard", bootstyle="secondary",
+                  command=self.close).pack(side="right")
+        # centrée sur la fenêtre principale
+        self.update_idletasks()
+        x = app.winfo_rootx() + (app.winfo_width() - self.winfo_reqwidth()) // 2
+        y = app.winfo_rooty() + (app.winfo_height() - self.winfo_reqheight()) // 3
+        self.geometry("+%d+%d" % (max(x, 0), max(y, 0)))
+
+    def close(self):
+        if self.optout_var.get():
+            self.app.settings["support_optout"] = True
+            ml.save_settings(self.app.settings)
+        self.destroy()
+
+    def support(self):
+        open_kofi()
+        self.close()
 
 
 def main():

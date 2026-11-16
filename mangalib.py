@@ -33,6 +33,7 @@ APP_NAME = "ComicRestyler"
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 SETTINGS_FILE = os.path.join(APP_DIR, "app_settings.json")
 LAUNCH_FILE = os.path.join(APP_DIR, "launch_config.json")
+KOFI_URL = "https://ko-fi.com/hypedigger"
 CONTROLNET_NAME_HINT = "controlnet-union-sdxl-promax"
 IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".bmp")
 OUT_SUFFIX = "_stylized"
@@ -51,7 +52,7 @@ def load_styles():
     path = os.path.join(APP_DIR, "styles.json")
     if not os.path.exists(path):
         path = os.path.join(APP_DIR, "styles.example.json")
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, "r", encoding="utf-8-sig") as f:  # tolère un BOM
         return json.load(f)
 
 
@@ -62,7 +63,9 @@ def save_styles(cfg):
 
 def load_settings():
     try:
-        with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+        # utf-8-sig : tolère un BOM (fichier réécrit par PowerShell/Notepad),
+        # sinon les réglages seraient ignorés puis écrasés au lancement
+        with open(SETTINGS_FILE, "r", encoding="utf-8-sig") as f:
             return json.load(f)
     except Exception:
         return {}
@@ -73,6 +76,26 @@ def save_settings(s):
         json.dump(s, f, indent=1, ensure_ascii=False)
 
 
+def bump_usage_count(s):
+    """Compte un lancement de plus dans les réglages `s` (et les enregistre).
+    Sert uniquement à espacer l'invitation Ko-fi."""
+    try:
+        n = int(s.get("usage_count", 0)) + 1
+    except (TypeError, ValueError):
+        n = 1
+    s["usage_count"] = n
+    try:
+        save_settings(s)
+    except OSError:
+        pass  # dossier en lecture seule : ne bloque jamais le démarrage
+    return n
+
+
+def support_due(n, optout=False):
+    """Invitation Ko-fi : au 10e lancement, puis tous les 100 (sauf opt-out)."""
+    return not optout and (n == 10 or (n >= 100 and n % 100 == 0))
+
+
 def comfy_url():
     return os.environ.get("COMFY_URL") \
         or load_settings().get("comfy_url") or "http://127.0.0.1:8188"
@@ -80,7 +103,7 @@ def comfy_url():
 
 def load_launch_config():
     try:
-        with open(LAUNCH_FILE, "r", encoding="utf-8") as f:
+        with open(LAUNCH_FILE, "r", encoding="utf-8-sig") as f:
             return json.load(f)
     except Exception:
         return {}
